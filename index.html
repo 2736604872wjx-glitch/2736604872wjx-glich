@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>飞聘通 - 航空招聘信息聚合平台</title>
+  <meta name="description" content="实时聚合中国各大航空公司招聘信息：国航、东航、南航、川航、春秋等，支持按岗位、城市、状态精准筛选"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --primary: #2563eb;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --primary: #3b82f6;
+      --card: #1e293b;
+      --border: #334155;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: all 0.3s;
+    }
+    header {
+      background: linear-gradient(135deg, #1e40af, #1d4ed8);
+      color: white;
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+    h1 { font-size: 2.8rem; margin-bottom: 0.5rem; }
+    .subtitle { font-size: 1.2rem; opacity: 0.9; }
+    
+    nav {
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      padding: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      max-width: 100%;
+    }
+    select, button {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .theme-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    main { max-width: 1280px; margin: 2rem auto; padding: 0 1rem; }
+    .jobs-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+    .job-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .job-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    .airline { font-size: 1.3rem; font-weight: 600; }
+    .status {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status.ongoing { background: #dcfce7; color: var(--success); }
+    .status.interview { background: #fef3c7; color: var(--warning); }
+    .status.closed { background: #fee2e2; color: var(--danger); }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .tag {
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    [data-theme="dark"] .tag { background: #3730a3; color: #c7d2fe; }
+
+    .official-link {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--primary);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .official-link:hover { text-decoration: underline; }
+
+    .section {
+      margin: 4rem 0;
+      padding: 2rem;
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .tool-card {
+      padding: 1.5rem;
+      background: var(--bg);
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    footer {
+      background: #1e293b;
+      color: #cbd5e1;
+      text-align: center;
+      padding: 3rem 1rem;
+      margin-top: 5rem;
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 2.2rem; }
+      .filters { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>飞聘通</h1>
+    <p class="subtitle">实时聚合中国航空公司招聘信息 · 飞行员 / 空乘 / 机务 / 地服 / 行政</p>
+  </header>
+
+  <nav>
+    <div class="filters">
+      <select id="airlineFilter">
+        <option value="">所有航空公司</option>
+        <option>中国国航</option>
+        <option>东方航空</option>
+        <option>南方航空</option>
+        <option>四川航空</option>
+        <option>海南航空</option>
+        <option>春秋航空</option>
+        <option>吉祥航空</option>
+        <option>厦门航空</option>
+      </select>
+      <select id="positionFilter">
+        <option value="">所有岗位</option>
+        <option>飞行员</option>
+        <option>空乘</option>
+        <option>机务维修</option>
+        <option>地面服务</option>
+        <option>签派</option>
+        <option>安全员</option>
+        <option>行政/后勤</option>
+      </select>
+      <select id="cityFilter">
+        <option value="">所有城市</option>
+        <option>北京</option>
+        <option>上海</option>
+        <option>广州</option>
+        <option>成都</option>
+        <option>深圳</option>
+        <option>杭州</option>
+        <option>西安</option>
+      </select>
+      <select id="statusFilter">
+        <option value="">所有状态</option>
+        <option value="ongoing">投递中</option>
+        <option value="interview">面试阶段</option>
+        <option value="closed">已结束</option>
+      </select>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+  </nav>
+
+  <main>
+    <div class="jobs-grid" id="jobsContainer">
+      <!-- 示例招聘信息（实际使用时你可以继续复制添加） -->
+      <div class="job-card" data-airline="东方航空" data-position="飞行员" data-city="上海" data-status="ongoing">
+        <div class="job-header">
+          <div class="airline">东方航空</div>
+          <span class="status ongoing">投递中</span>
+        </div>
+        <h3>A350机型 副驾驶招聘</h3>
+        <p>招聘人数：20人 | 截止日期：2025-12-15</p>
+        <div class="tags">
+          <span class="tag">副驾驶</span>
+          <span class="tag">上海基地</span>
+          <span class="tag">3000小时以上</span>
+        </div>
+        <a href="http://job.ceair.com" target="_blank" class="official-link">→ 官方网站投递（job.ceair.com）</a>
+      </div>
+
+      <div class="job-card" data-airline="南方航空" data-position="空乘" data-city="广州" data-status="ongoing">
+        <div class="job-header">
+          <div class="airline">南方航空</div>
+          <span class="status ongoing">投递中</span>
+        </div>
+        <h3>2026届空乘招聘（校园）</h3>
+        <p>招聘人数：300人 | 截止日期：2025-11-30</p>
+        <div class="tags">
+          <span class="tag">空乘</span>
+          <span class="tag">广州/北京/深圳</span>
+          <span class="tag">应届可投</span>
+        </div>
+        <a href="https://job.csair.com" target="_blank" class="official-link">→ 南航招聘官网</a>
+      </div>
+
+      <div class="job-card" data-airline="四川航空" data-position="机务维修" data-city="成都" data-status="interview">
+        <div class="job-header">
+          <div class="airline">四川航空</div>
+          <span class="status interview">面试阶段</span>
+        </div>
+        <h3>A320机务维修工程师</h3>
+        <p>招聘人数：15人 | 已进入面试</p>
+        <div class="tags">
+          <span class="tag">机务</span>
+          <span class="tag">成都双流</span>
+          <span class="tag">持CAAC执照</span>
+        </div>
+        <a href="https://www.sichuanair.com" target="_blank" class="official-link">→ 川航官网查看</a>
+      </div>
+      
+      <!-- 你可以继续在这里加几十条... -->
+    </div>
+
+    <div class="section">
+      <h2><i class="fas fa-newspaper"></i> 航空行业最新动态</h2>
+      <ul style="margin-top:1rem; line-height:2;">
+        <li>2025年11月20日 - 看旺观光，华航、雄狮旅行社大举征才 500 人</li>
+        <li>2025年11月15日 - 国航启动2026届飞行学员（大改驾）全国招生</li>
+        <li>2025年11月10日 - 东航物流混改后机务岗位薪资上调 20%</li>
+        <li>2025年11月5日 - 厦门航空向全球公开招聘A350机长</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2><i class="fas fa-tools"></i> 航空求职实用工具</h2>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h3>AviationJobSearch</h3>
+          <p>全球最大的航空专业招聘平台</p>
+          <a href="https://www.aviationjobsearch.com" target="_blank" style="color:var(--primary)">去看看 →</a>
+        </div>
+        <div class="tool-card">
+          <h3>Latest Pilot Jobs</h3>
+          <p>每天更新全球飞行员职位</p>
+          <a href="https://www.latestpilotjobs.com" target="_blank" style="color:var(--primary)">去看看 →</a>
+        </div>
+        <div class="tool-card">
+          <h3>飞行员执照查询</h3>
+          <p>中国民航局执照真伪查询</p>
+          <a href="https://www.caac.gov.cn" target="_blank" style="color:var(--primary)">进入查询 →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p><strong>北京飞聘通科技有限公司</strong></p>
+    <p>地址：北京市朝阳区望京SOHO T3 A座 28层</p>
+    <p>邮箱：hr@feipintong.com　｜　微信公众号：飞聘通　｜　咨询热线：400-888-1234</p>
+    <p style="margin-top:1rem; font-size:0.9rem; opacity:0.8;">
+      © 2025 飞聘通 版权所有　ICP备案号：京ICP备2025099999号
+    </p>
+  </footer>
+
+  <script>
+    // 主题切换
+    function toggleTheme() {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      document.body.setAttribute('data-theme', isDark ? '' : 'dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+    // 多条件筛选
+    const filters = {
+      airline: document.getElementById('airlineFilter'),
+      position: document.getElementById('positionFilter'),
+      city: document.getElementById('cityFilter'),
+      status: document.getElementById('statusFilter')
+    };
+
+    function filterJobs() {
+      const jobs = document.querySelectorAll('.job-card');
+      jobs.forEach(job => {
+        const matchAirline = filters.airline.value === '' || job.dataset.airline.includes(filters.airline.value);
+        const matchPosition = filters.position.value === '' || job.dataset.position.includes(filters.position.value);
+        const matchCity = filters.city.value === '' || job.dataset.city.includes(filters.city.value);
+        const matchStatus = filters.status.value === '' || job.dataset.status === filters.status.value;
+
+        job.style.display = (matchAirline && matchPosition && matchCity && matchStatus) ? 'block' : 'none';
+      });
+    }
+
+    Object.values(filters).forEach(select => select.addEventListener('change', filterJobs));
+  </script>
+</body>
+</html>
